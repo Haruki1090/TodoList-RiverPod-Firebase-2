@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todolist_riverpod_firebase2/todo.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,6 +17,13 @@ class MyApp extends StatelessWidget {
 class TodoScreen extends StatefulWidget {
   @override
   _TodoScreenState createState() => _TodoScreenState();
+}
+
+class Todo {
+  String text;
+  bool isDone;
+
+  Todo(this.text, this.isDone);
 }
 
 class _TodoScreenState extends State<TodoScreen> {
@@ -48,7 +54,7 @@ class _TodoScreenState extends State<TodoScreen> {
                       child: TextField(
                         controller: _textController,
                         decoration: InputDecoration(
-                          hintText: 'Add a new Todo...',
+                          hintText: 'Todoを入力してください',
                           border: InputBorder.none,
                         ),
                       ),
@@ -117,12 +123,58 @@ class _TodoScreenState extends State<TodoScreen> {
   }
 
   void _editTodo(int index) {
-    // Todoを編集する処理を実装
+     showDialog(context: context, builder: (context) {
+        return AlertDialog(
+          title: Text('編集'),
+          content: TextField(
+            controller: TextEditingController(text: _todoList[index].text),
+            onChanged: (value) {
+              _todoList[index].text = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              child: Text('キャンセル'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('保存'),
+              onPressed: () {
+                setState(() {
+                  Navigator.pop(context);
+                });
+              },
+            ),
+          ],
+        );
+      });
   }
 
   void _deleteTodo(int index) {
-    setState(() {
-      _todoList.removeAt(index);
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text('削除確認'),
+        content: Text('削除してもよろしいですか？'),
+        actions: [
+          TextButton(
+            child: Text('キャンセル'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('削除'),
+            onPressed: () {
+              setState(() {
+                _todoList.removeAt(index);
+                Navigator.pop(context);
+              });
+            },
+          ),
+        ],
+      );
     });
   }
 
