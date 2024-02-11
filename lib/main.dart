@@ -93,6 +93,8 @@ class TodoScreen extends ConsumerWidget {
     }
 
     void _editTodo(int index, WidgetRef ref, BuildContext context) async {
+      var updatedTodoList = List<Todo>.from(_todoList);
+
       showDialog(
         context: context,
         builder: (context) {
@@ -102,9 +104,7 @@ class TodoScreen extends ConsumerWidget {
               controller: TextEditingController(text: _todoList[index].title),
               onChanged: (value) {
                 var updatedTodo = _todoList[index].copyWith(title: value);
-                var updatedTodoList = List<Todo>.from(_todoList);
                 updatedTodoList[index] = updatedTodo;
-                ref.read(_todoListProvider.notifier).state = updatedTodoList;
               },
             ),
             actions: [
@@ -118,7 +118,11 @@ class TodoScreen extends ConsumerWidget {
                 child: Text('保存'),
                 onPressed: () async {
                   try {
-                    await _firestoreService.updateTodo(_todoList[index]);
+                    // Firestore への更新
+                    await _firestoreService.updateTodo(updatedTodoList[index]);
+
+                    // リストの更新
+                    ref.read(_todoListProvider.notifier).state = updatedTodoList;
                     Navigator.pop(context);
                   } catch (e) {
                     _showErrorDialog('Todoの更新に失敗しました: $e');
@@ -130,6 +134,7 @@ class TodoScreen extends ConsumerWidget {
         },
       );
     }
+
 
 
 
@@ -216,7 +221,7 @@ class TodoScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Todoリスト
+
           Expanded(
             child: ListView.builder(
               itemCount: _todoList.length,

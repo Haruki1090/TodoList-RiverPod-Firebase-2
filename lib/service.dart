@@ -16,9 +16,8 @@ class FirestoreService {
         'createdAt': todo.createdAt,
       });
     } catch (e) {
-      // エラーハンドリング
       print('Error adding todo: $e');
-      throw e; // エラーを再スロー
+      throw e;
     }
   }
 
@@ -43,6 +42,8 @@ class FirestoreService {
   }
 
   /// Update
+  /// TodoのisDoneを更新する
+  /// Todoのタイトルを更新する
   Future<void> updateTodo(Todo todo) async {
     try {
       // Collection名: todoList
