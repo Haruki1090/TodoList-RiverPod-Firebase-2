@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todolist_riverpod_firebase2/todo.dart';
 
 void main() {
   runApp(
@@ -22,17 +23,21 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Todo {
-  String title;
-  bool isDone;
-  DateTime dateTime;
-
-    Todo(this.title, this.isDone, this.dateTime);
-}
-
 class TodoScreen extends ConsumerWidget {
   TextEditingController _textController = TextEditingController();
   final _todoListProvider = StateProvider<List<Todo>>((ref) => <Todo>[]);
+
+  late final Todo todo;
+  late final Todo newTodo;
+
+  TodoScreen() : super() {
+    todo = Todo(
+      title: '',
+      isDone: false,
+      createdAt: DateTime.now(),
+    );
+    newTodo = todo.copyWith(title: 'new title');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,9 +47,9 @@ class TodoScreen extends ConsumerWidget {
       String newTodoTitle = _textController.text;
       if (newTodoTitle.isNotEmpty) {
         var newTodo = Todo(
-          newTodoTitle,
-          false,
-          DateTime.now(),
+          title: newTodoTitle,
+          isDone: false,
+          createdAt: DateTime.now(),
         );
         ref.read(_todoListProvider.notifier).state = [..._todoList, newTodo];
         _textController.clear();
@@ -52,34 +57,39 @@ class TodoScreen extends ConsumerWidget {
     }
 
     void _editTodo(int index, WidgetRef ref, BuildContext context) {
-      showDialog(context: context, builder: (context) {
-        return AlertDialog(
-          title: Text('編集'),
-          content: TextField(
-            controller: TextEditingController(text: _todoList[index].title),
-            onChanged: (value) {
-              var updatedTodoList = List<Todo>.from(_todoList);
-              updatedTodoList[index].title = value;
-              ref.read(_todoListProvider.notifier).state = updatedTodoList;
-            },
-          ),
-          actions: [
-            TextButton(
-              child: Text('キャンセル'),
-              onPressed: () {
-                Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('編集'),
+            content: TextField(
+              controller: TextEditingController(text: _todoList[index].title),
+              onChanged: (value) {
+                var updatedTodo = _todoList[index].copyWith(title: value);
+                var updatedTodoList = List<Todo>.from(_todoList);
+                updatedTodoList[index] = updatedTodo;
+                ref.read(_todoListProvider.notifier).state = updatedTodoList;
               },
             ),
-            TextButton(
-              child: Text('保存'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      });
+            actions: [
+              TextButton(
+                child: Text('キャンセル'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: Text('保存'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
+
 
     void _deleteTodo(int index, WidgetRef ref, BuildContext context) {
       showDialog(context: context, builder: (context) {
@@ -108,8 +118,9 @@ class TodoScreen extends ConsumerWidget {
     }
 
     void _toggleDone(int index, bool value, WidgetRef ref, BuildContext context) {
-      List<Todo> updatedTodoList = List<Todo>.from(_todoList);
-      updatedTodoList[index].isDone = value;
+      var updatedTodo = _todoList[index].copyWith(isDone: value);
+      var updatedTodoList = List<Todo>.from(_todoList);
+      updatedTodoList[index] = updatedTodo;
       ref.read(_todoListProvider.notifier).state = updatedTodoList;
     }
 
