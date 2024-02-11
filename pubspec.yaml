@@ -16,6 +16,7 @@ dependencies:
   riverpod_annotation:
   freezed_annotation:
   firebase_core:
+  cloud_firestore:
 
 
 dev_dependencies:

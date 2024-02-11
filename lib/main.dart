@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todolist_riverpod_firebase2/todo.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'service.dart';
 
-Future<void> main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -32,9 +33,11 @@ class MyApp extends StatelessWidget {
 class TodoScreen extends ConsumerWidget {
   TextEditingController _textController = TextEditingController();
   final _todoListProvider = StateProvider<List<Todo>>((ref) => <Todo>[]);
+  final _firestoreService = FirestoreService();
 
   late final Todo todo;
   late final Todo newTodo;
+  late BuildContext _context;
 
   TodoScreen() : super() {
     todo = Todo(
@@ -45,11 +48,33 @@ class TodoScreen extends ConsumerWidget {
     newTodo = todo.copyWith(title: 'new title');
   }
 
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: _context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('エラー'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    _context = context;
     List<Todo> _todoList = ref.watch(_todoListProvider);
 
-    void _addTodo(ref, context) {
+    void _addTodo(ref, context) async {
       String newTodoTitle = _textController.text;
       if (newTodoTitle.isNotEmpty) {
         var newTodo = Todo(
@@ -57,12 +82,17 @@ class TodoScreen extends ConsumerWidget {
           isDone: false,
           createdAt: DateTime.now(),
         );
-        ref.read(_todoListProvider.notifier).state = [..._todoList, newTodo];
-        _textController.clear();
+        try {
+          await _firestoreService.addTodo(newTodo);
+          ref.read(_todoListProvider.notifier).state = [..._todoList, newTodo];
+          _textController.clear();
+        } catch (e) {
+          _showErrorDialog('Todoの追加に失敗しました: $e');
+        }
       }
     }
 
-    void _editTodo(int index, WidgetRef ref, BuildContext context) {
+    void _editTodo(int index, WidgetRef ref, BuildContext context) async {
       showDialog(
         context: context,
         builder: (context) {
@@ -86,8 +116,13 @@ class TodoScreen extends ConsumerWidget {
               ),
               TextButton(
                 child: Text('保存'),
-                onPressed: () {
-                  Navigator.pop(context);
+                onPressed: () async {
+                  try {
+                    await _firestoreService.updateTodo(_todoList[index]);
+                    Navigator.pop(context);
+                  } catch (e) {
+                    _showErrorDialog('Todoの更新に失敗しました: $e');
+                  }
                 },
               ),
             ],
@@ -97,7 +132,8 @@ class TodoScreen extends ConsumerWidget {
     }
 
 
-    void _deleteTodo(int index, WidgetRef ref, BuildContext context) {
+
+    void _deleteTodo(int index, WidgetRef ref, BuildContext context) async {
       showDialog(context: context, builder: (context) {
         return AlertDialog(
           title: Text('削除確認'),
@@ -111,11 +147,16 @@ class TodoScreen extends ConsumerWidget {
             ),
             TextButton(
               child: Text('削除'),
-              onPressed: () {
-                var updatedTodoList = List<Todo>.from(_todoList);
-                updatedTodoList.removeAt(index);
-                ref.read(_todoListProvider.notifier).state = updatedTodoList;
-                Navigator.pop(context);
+              onPressed: () async {
+                try {
+                  await _firestoreService.deleteTodo(_todoList[index]);
+                  var updatedTodoList = List<Todo>.from(_todoList);
+                  updatedTodoList.removeAt(index);
+                  ref.read(_todoListProvider.notifier).state = updatedTodoList;
+                  Navigator.pop(context);
+                } catch (e) {
+                  _showErrorDialog('Todoの削除に失敗しました: $e');
+                }
               },
             ),
           ],
@@ -123,12 +164,20 @@ class TodoScreen extends ConsumerWidget {
       });
     }
 
-    void _toggleDone(int index, bool value, WidgetRef ref, BuildContext context) {
+
+    void _toggleDone(int index, bool value, WidgetRef ref, BuildContext context) async {
       var updatedTodo = _todoList[index].copyWith(isDone: value);
       var updatedTodoList = List<Todo>.from(_todoList);
       updatedTodoList[index] = updatedTodo;
-      ref.read(_todoListProvider.notifier).state = updatedTodoList;
+
+      try {
+        await _firestoreService.updateTodo(updatedTodo);
+        ref.read(_todoListProvider.notifier).state = updatedTodoList;
+      } catch (e) {
+        _showErrorDialog('Todoの更新に失敗しました: $e');
+      }
     }
+
 
 
     return Scaffold(
