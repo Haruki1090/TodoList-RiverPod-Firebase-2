@@ -15,6 +15,7 @@ dependencies:
   flutter_riverpod:
   riverpod_annotation:
   freezed_annotation:
+  firebase_core:
 
 
 dev_dependencies:
@@ -23,6 +24,7 @@ dev_dependencies:
   build_runner:
   riverpod_generator:
   freezed:
+
 
 flutter:
 
