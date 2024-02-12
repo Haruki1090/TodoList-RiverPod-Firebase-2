@@ -30,9 +30,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
+  final _todoListProvider = StateProvider<List<Todo>>((ref) => <Todo>[]);
+
 class TodoScreen extends ConsumerWidget {
   TextEditingController _textController = TextEditingController();
-  final _todoListProvider = StateProvider<List<Todo>>((ref) => <Todo>[]);
   final _firestoreService = FirestoreService();
 
   late final Todo todo;
