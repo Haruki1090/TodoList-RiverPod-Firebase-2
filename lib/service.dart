@@ -8,8 +8,10 @@ class FirestoreService {
   Future<void> addTodo(Todo todo) async {
     try {
       // Collection名　-> todoList
-      // ID -> createdAtを文字列変換したもの
-      await _db.collection('todoList').doc(todo.createdAt.toString()).set({
+      // ID -> documentReference.id
+      final documentReference = _db.collection('todoList').doc();
+      await documentReference.set({
+        'id': documentReference.id,
         'title': todo.title,
         'isDone': todo.isDone,
         'createdAt': todo.createdAt,
@@ -21,21 +23,21 @@ class FirestoreService {
   }
 
   /// Read
-  Stream<List<Todo>> readTodo() {
+  Stream<List<Todo>> getTodoList() {
     try {
       // Collection名 -> todoList
       return _db.collection('todoList').snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
           return Todo(
-            title: data['title'],
-            isDone: data['isDone'],
-            createdAt: data['createdAt'].toDate(),
+            id: doc.id, // Change this line
+            title: doc['title'],
+            isDone: doc['isDone'],
+            createdAt: doc['createdAt'].toDate(),
           );
         }).toList();
       });
     } catch (e) {
-      print('Error reading todo: $e');
+      print('Error getting todoList: $e');
       throw e;
     }
   }
@@ -45,22 +47,33 @@ class FirestoreService {
     try {
       // Collection名 -> todoList
       // ID -> createdAtを文字列変換したもの
-      await _db.collection('todoList').doc(todo.createdAt.toString()).update({
-        'title': todo.title,
-        'isDone': todo.isDone,
-      });
+      var document = _db.collection('todoList').doc(todo.id);
+
+      var docSnapshot = await document.get();
+      if (docSnapshot.exists) {
+        // ドキュメントが存在する場合
+        await document.update({
+          'title': todo.title,
+          'isDone': todo.isDone,
+        });
+      } else {
+        // ドキュメントが存在しない場合
+        print('Document does not exist for Todo: $todo');
+      }
     } catch (e) {
       print('Error updating todo: $e');
       throw e;
     }
   }
 
+
+
   /// Delete
   Future<void> deleteTodo(Todo todo) async {
     try {
       // Collection名 -> todoList
       // ID -> createdAtを文字列変換したもの
-      await _db.collection('todoList').doc(todo.createdAt.toString()).delete();
+      await _db.collection('todoList').doc(todo.id).delete();
     } catch (e) {
       print('Error deleting todo: $e');
       throw e;
