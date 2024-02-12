@@ -1,15 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:todolist_riverpod_firebase2/todo.dart';
 
-/// Firestoreとの通信を行うクラス
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// Create
   Future<void> addTodo(Todo todo) async {
     try {
-      // Collection名: todoList
-      // ID: createdAtを文字列変換したもの
+      // Collection名　-> todoList
+      // ID -> createdAtを文字列変換したもの
       await _db.collection('todoList').doc(todo.createdAt.toString()).set({
         'title': todo.title,
         'isDone': todo.isDone,
@@ -24,7 +23,7 @@ class FirestoreService {
   /// Read
   Stream<List<Todo>> readTodo() {
     try {
-      // Collection名: todoList
+      // Collection名 -> todoList
       return _db.collection('todoList').snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
           Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -42,12 +41,10 @@ class FirestoreService {
   }
 
   /// Update
-  /// TodoのisDoneを更新する
-  /// Todoのタイトルを更新する
   Future<void> updateTodo(Todo todo) async {
     try {
-      // Collection名: todoList
-      // ID: createdAtを文字列変換したもの
+      // Collection名 -> todoList
+      // ID -> createdAtを文字列変換したもの
       await _db.collection('todoList').doc(todo.createdAt.toString()).update({
         'title': todo.title,
         'isDone': todo.isDone,
@@ -61,8 +58,8 @@ class FirestoreService {
   /// Delete
   Future<void> deleteTodo(Todo todo) async {
     try {
-      // Collection名: todoList
-      // ID: createdAtを文字列変換したもの
+      // Collection名 -> todoList
+      // ID -> createdAtを文字列変換したもの
       await _db.collection('todoList').doc(todo.createdAt.toString()).delete();
     } catch (e) {
       print('Error deleting todo: $e');
