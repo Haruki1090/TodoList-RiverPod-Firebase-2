@@ -150,10 +150,6 @@ class TodoScreen extends ConsumerWidget {
       );
     }
 
-
-
-
-
     void _deleteTodo(int index, WidgetRef ref, BuildContext context) async {
       showDialog(context: context, builder: (context) {
         return AlertDialog(
@@ -189,7 +185,6 @@ class TodoScreen extends ConsumerWidget {
     }
 
 
-
     void _toggleDone(int index, bool value, WidgetRef ref, BuildContext context) async {
       var updatedTodo = _todoList[index].copyWith(isDone: value);
       var updatedTodoList = List<Todo>.from(_todoList);
@@ -202,8 +197,6 @@ class TodoScreen extends ConsumerWidget {
         _showErrorDialog('Todoの更新に失敗しました: $e');
       }
     }
-
-
 
     return Scaffold(
       appBar: AppBar(
