@@ -42,12 +42,16 @@ class TodoScreen extends ConsumerWidget {
     isDone: false,
     createdAt: DateTime.now(),
   );
-  
-  late BuildContext _context;
+
+
+  @override
+  Widget build(context, ref) {
+    List<Todo> _todoList = ref.watch(_todoListProvider);
+
 
   void _showErrorDialog(String message) {
     showDialog(
-      context: _context,
+      context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('エラー'),
@@ -65,10 +69,6 @@ class TodoScreen extends ConsumerWidget {
     );
   }
 
-  @override
-  Widget build(context, ref) {
-    _context = context;
-    List<Todo> _todoList = ref.watch(_todoListProvider);
 
     void _readTodo() async {
       try {
@@ -100,6 +100,7 @@ class TodoScreen extends ConsumerWidget {
         }
       }
     }
+
 
     void _editTodo(int index) async {
       var updatedTodoList = List<Todo>.from(_todoList);
@@ -143,6 +144,7 @@ class TodoScreen extends ConsumerWidget {
         },
       );
     }
+
 
     void _deleteTodo(int index) async {
       showDialog(context: context, builder: (context) {
