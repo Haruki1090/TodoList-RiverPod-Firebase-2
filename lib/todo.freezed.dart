@@ -14,6 +14,10 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+Todo _$TodoFromJson(Map<String, dynamic> json) {
+  return _Todo.fromJson(json);
+}
+
 /// @nodoc
 mixin _$Todo {
   String get id => throw _privateConstructorUsedError;
@@ -21,6 +25,7 @@ mixin _$Todo {
   bool get isDone => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $TodoCopyWith<Todo> get copyWith => throw _privateConstructorUsedError;
 }
@@ -119,10 +124,17 @@ class __$$TodoImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$TodoImpl implements _Todo {
   const _$TodoImpl(
-      {required this.id, required this.title, required this.isDone, required this.createdAt});
+      {required this.id,
+      required this.title,
+      required this.isDone,
+      required this.createdAt});
+
+  factory _$TodoImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TodoImplFromJson(json);
+
   @override
   final String id;
   @override
@@ -134,7 +146,7 @@ class _$TodoImpl implements _Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id,title: $title, isDone: $isDone, createdAt: $createdAt)';
+    return 'Todo(id: $id, title: $title, isDone: $isDone, createdAt: $createdAt)';
   }
 
   @override
@@ -149,23 +161,32 @@ class _$TodoImpl implements _Todo {
                 other.createdAt == createdAt));
   }
 
+  @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType,id, title, isDone, createdAt);
+  int get hashCode => Object.hash(runtimeType, id, title, isDone, createdAt);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$TodoImplCopyWith<_$TodoImpl> get copyWith =>
       __$$TodoImplCopyWithImpl<_$TodoImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TodoImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _Todo implements Todo {
   const factory _Todo(
-      {
-        required String id,
-        required final String title,
-        required final bool isDone,
-        required final DateTime createdAt}) = _$TodoImpl;
+      {required final String id,
+      required final String title,
+      required final bool isDone,
+      required final DateTime createdAt}) = _$TodoImpl;
+
+  factory _Todo.fromJson(Map<String, dynamic> json) = _$TodoImpl.fromJson;
 
   @override
   String get id;
