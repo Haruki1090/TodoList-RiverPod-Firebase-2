@@ -36,18 +36,14 @@ class TodoScreen extends ConsumerWidget {
   TextEditingController _textController = TextEditingController();
   final _firestoreService = FirestoreService();
 
-  late final Todo newTodo;
+  final Todo newTodo = Todo(
+    id: '',
+    title: '',
+    isDone: false,
+    createdAt: DateTime.now(),
+  );
+  
   late BuildContext _context;
-
-  TodoScreen() : super() {
-    newTodo = Todo(
-      id: '',
-      title: '',
-      isDone: false,
-      createdAt: DateTime.now(),
-    );
-  }
-
 
   void _showErrorDialog(String message) {
     showDialog(
