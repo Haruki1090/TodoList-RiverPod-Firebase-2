@@ -201,12 +201,18 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            _readTodo();
+          },
+          icon: Icon(Icons.refresh),
+        ),
         actions: [
           IconButton(
               onPressed: (){
-                _readTodo();
+                null;
               },
-              icon: Icon(Icons.refresh)
+              icon: Icon(Icons.settings)
           )
         ],
         title: Text('Todo App'),
