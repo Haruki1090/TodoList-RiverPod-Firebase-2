@@ -72,11 +72,11 @@ class TodoScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(context, ref) {
     _context = context;
     List<Todo> _todoList = ref.watch(_todoListProvider);
 
-    void _readTodo(WidgetRef ref, BuildContext context) async {
+    void _readTodo() async {
       try {
         var todoList = await _firestoreService.getTodoList().first;
         ref.read(_todoListProvider.notifier).state = todoList;
@@ -85,7 +85,7 @@ class TodoScreen extends ConsumerWidget {
       }
     }
 
-    void _addTodo(WidgetRef ref, BuildContext context) async {
+    void _addTodo() async {
       String newTodoTitle = _textController.text;
       if (newTodoTitle.isNotEmpty) {
         var newTodo = Todo(
@@ -98,7 +98,7 @@ class TodoScreen extends ConsumerWidget {
           await _firestoreService.addTodo(newTodo);
 
           /// データを追加した後にFirestoreから最新のデータを読み込む
-          _readTodo(ref, context);
+          _readTodo();
 
           _textController.clear();
         } catch (e) {
@@ -107,7 +107,7 @@ class TodoScreen extends ConsumerWidget {
       }
     }
 
-    void _editTodo(int index, WidgetRef ref, BuildContext context) async {
+    void _editTodo(int index) async {
       var updatedTodoList = List<Todo>.from(_todoList);
 
       showDialog(
@@ -150,7 +150,7 @@ class TodoScreen extends ConsumerWidget {
       );
     }
 
-    void _deleteTodo(int index, WidgetRef ref, BuildContext context) async {
+    void _deleteTodo(int index) async {
       showDialog(context: context, builder: (context) {
         return AlertDialog(
           title: Text('削除確認'),
@@ -185,7 +185,7 @@ class TodoScreen extends ConsumerWidget {
     }
 
 
-    void _toggleDone(int index, bool value, WidgetRef ref, BuildContext context) async {
+    void _toggleDone(int index, bool value) async {
       var updatedTodo = _todoList[index].copyWith(isDone: value);
       var updatedTodoList = List<Todo>.from(_todoList);
       updatedTodoList[index] = updatedTodo;
@@ -203,7 +203,7 @@ class TodoScreen extends ConsumerWidget {
         actions: [
           IconButton(
               onPressed: (){
-                _readTodo(ref, context);
+                _readTodo();
               },
               icon: Icon(Icons.refresh))
         ],
@@ -234,7 +234,7 @@ class TodoScreen extends ConsumerWidget {
                     ),
                     IconButton(
                       icon: Icon(Icons.add),
-                      onPressed: () => _addTodo(ref, context),
+                      onPressed: () => _addTodo(),
                     ),
                   ],
                 ),
@@ -256,19 +256,19 @@ class TodoScreen extends ConsumerWidget {
                         Checkbox(
                           value: _todoList[index].isDone,
                           onChanged: (value) {
-                            _toggleDone(index, value!, ref, context);
+                            _toggleDone(index, value!);
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.edit),
                           onPressed: () {
-                            _editTodo(index, ref, context);
+                            _editTodo(index);
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () {
-                            _deleteTodo(index, ref, context);
+                            _deleteTodo(index);
                           },
                         ),
                       ],
