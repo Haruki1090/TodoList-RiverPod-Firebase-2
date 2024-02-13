@@ -36,18 +36,16 @@ class TodoScreen extends ConsumerWidget {
   TextEditingController _textController = TextEditingController();
   final _firestoreService = FirestoreService();
 
-  late final Todo todo;
   late final Todo newTodo;
   late BuildContext _context;
 
   TodoScreen() : super() {
-    todo = Todo(
+    newTodo = Todo(
       id: '',
       title: '',
       isDone: false,
       createdAt: DateTime.now(),
     );
-    newTodo = todo.copyWith(title: 'new title');
   }
 
 
