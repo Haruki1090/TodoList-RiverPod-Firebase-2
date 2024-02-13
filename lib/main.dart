@@ -77,7 +77,7 @@ class TodoScreen extends ConsumerWidget {
     List<Todo> _todoList = ref.watch(_todoListProvider);
 
     void _readTodo(WidgetRef ref, BuildContext context) async {
-try {
+      try {
         var todoList = await _firestoreService.getTodoList().first;
         ref.read(_todoListProvider.notifier).state = todoList;
       } catch (e) {
@@ -207,6 +207,13 @@ try {
 
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+              onPressed: (){
+                _readTodo(ref, context);
+              },
+              icon: Icon(Icons.refresh))
+        ],
         title: Text('Todo App'),
       ),
       body: Column(
