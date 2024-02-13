@@ -32,8 +32,13 @@ class MyApp extends StatelessWidget {
 
 final _todoListProvider = StateProvider<List<Todo>>((ref) => <Todo>[]);
 
-class TodoScreen extends ConsumerWidget {
-  TextEditingController _textController = TextEditingController();
+class TodoScreen extends ConsumerStatefulWidget {
+  ConsumerState<TodoScreen> createState() => _TodoScreenState();
+}
+
+class _TodoScreenState extends ConsumerState<TodoScreen> {
+
+  final _textController = TextEditingController();
   final _firestoreService = FirestoreService();
 
   final Todo newTodo = Todo(
@@ -43,9 +48,8 @@ class TodoScreen extends ConsumerWidget {
     createdAt: DateTime.now(),
   );
 
-
   @override
-  Widget build(context, ref) {
+  Widget build(BuildContext context) {
     List<Todo> _todoList = ref.watch(_todoListProvider);
 
 
@@ -69,7 +73,6 @@ class TodoScreen extends ConsumerWidget {
       );
     }
 
-
     void _readTodo() async {
       try {
         var todoList = await _firestoreService.getTodoList().first;
@@ -78,6 +81,8 @@ class TodoScreen extends ConsumerWidget {
         _showErrorDialog('Todoの読み込みに失敗しました: $e');
       }
     }
+
+    _readTodo();
 
     void _addTodo() async {
       String newTodoTitle = _textController.text;
@@ -110,12 +115,12 @@ class TodoScreen extends ConsumerWidget {
         builder: (context) {
           return AlertDialog(
             title: Text('編集'),
-            content: TextField(
-              controller: TextEditingController(text: _todoList[index].title),
-              onChanged: (value) {
-                var updatedTodo = _todoList[index].copyWith(title: value);
-                updatedTodoList[index] = updatedTodo;
-              },
+            content: TodoListTileTextField(
+                initialValue: _todoList[index].title,
+                onChanged: (value) {
+                  var updatedTodo = _todoList[index].copyWith(title: value);
+                  updatedTodoList[index] = updatedTodo;
+                }
             ),
             actions: [
               TextButton(
@@ -201,7 +206,8 @@ class TodoScreen extends ConsumerWidget {
               onPressed: (){
                 _readTodo();
               },
-              icon: Icon(Icons.refresh))
+              icon: Icon(Icons.refresh)
+          )
         ],
         title: Text('Todo App'),
       ),
@@ -276,6 +282,35 @@ class TodoScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class TodoListTileTextField extends ConsumerStatefulWidget {
+  const TodoListTileTextField({
+    required this.initialValue,
+    required this.onChanged,
+  });
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+
+  ConsumerState<TodoListTileTextField> createState() => _TodoListTileTextFieldState();
+}
+
+class _TodoListTileTextFieldState extends ConsumerState<TodoListTileTextField> {
+  late TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _textController,
+      onChanged: widget.onChanged,
     );
   }
 }
